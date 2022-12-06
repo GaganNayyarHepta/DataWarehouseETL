@@ -1,0 +1,46 @@
+version: '3.8'
+
+networks:
+  app_net:
+
+volumes:
+  vol_data:
+
+
+services:
+  db:
+    container_name: pg_container
+    image: postgres
+    environment:
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: root
+      POSTGRES_DB: test_db
+    volumes:
+     - /vol_data:/var/lib/postgres/data
+    networks:
+     - app_net
+    ports:
+      - "5432:5432"
+  pgadmin:
+    container_name: pgadmin4_container
+    image: dpage/pgadmin4
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: root
+    networks:
+      - app_net
+    ports:
+      - "5050:80"
+  app:
+    container_name: app
+    build:
+      dockerfile: dockerfile
+      context: ./
+    depends_on:
+      - db
+    networks:
+      - app_net
+    volumes:
+      - ./scripts:/usr/local/code/scripts
+    ports:
+      - 5000:5000
